@@ -17,7 +17,7 @@ categories = ["game-development"]
 [dependencies]
 approx = "0.5"
 bevy_polyline = "0.12"
-parry3d = "0.19"
+parry3d-f64 = "0.19"
 bevy = { version = "0.16", default-features = false, features = [
   "bevy_asset",
   "bevy_pbr",

@@ -1,12 +1,11 @@
 use crate::BoxFrame;
 use bevy::{
     ecs::prelude::*,
-    math::Vec3Swizzles,
     picking::backend::{ray::RayMap, HitData, PointerHits},
     prelude::{Camera, GlobalTransform},
     render::view::RenderLayers,
 };
-use parry3d::{na::Isometry3, query::RayCast};
+use parry3d_f64::{na::Isometry3, query::RayCast};
 
 /// Generates pointer hits for the box frame's AABB and handles.
 pub(crate) fn box_frame_backend(
@@ -23,7 +22,10 @@ pub(crate) fn box_frame_backend(
 
         let cam_view_mask = view_mask.unwrap_or_default();
 
-        let ray = parry3d::query::Ray::new(ray.origin.into(), ray.direction.xyz().into());
+        let ray = parry3d_f64::query::Ray::new(
+            ray.origin.as_dvec3().into(),
+            ray.direction.as_dvec3().into(),
+        );
 
         let mut picks = Vec::new();
         for (frame_entity, frame, frame_transform, frame_view_mask) in &box_frames {
@@ -40,8 +42,8 @@ pub(crate) fn box_frame_backend(
                 .into_iter()
                 .filter_map(|handle_entity| {
                     let transform = transforms.get(handle_entity).ok()?;
-                    let isometry = isometry_from_transform(transform);
-                    ball.cast_ray(&isometry, &ray, f32::INFINITY, true)
+                    let isometry = isometry_from_transform(transform).cast::<f64>();
+                    ball.cast_ray(&isometry, &ray, f64::INFINITY, true)
                         .map(|toi| {
                             let world_handle_center = transform.translation();
                             (toi, handle_entity, world_handle_center)
@@ -56,14 +58,19 @@ pub(crate) fn box_frame_backend(
                 let fudge = 0.001;
                 picks.push((
                     handle_entity,
-                    HitData::new(ray_id.camera, toi - fudge, Some(intersect_p.into()), None),
+                    HitData::new(
+                        ray_id.camera,
+                        toi as f32 - fudge,
+                        Some(intersect_p.cast::<f32>().into()),
+                        None,
+                    ),
                 ));
                 picks.push((
                     frame_entity,
                     HitData::new(
                         ray_id.camera,
-                        toi,
-                        Some(intersect_p.into()),
+                        toi as f32,
+                        Some(intersect_p.cast::<f32>().into()),
                         Some(world_normal),
                     ),
                 ));
@@ -72,18 +79,20 @@ pub(crate) fn box_frame_backend(
 
             // No handle intersections, check for AABB intersection.
             let isometry = isometry_from_transform(frame_transform);
+
             if let Some(hit) =
                 frame
                     .aabb()
-                    .cast_ray_and_get_normal(&isometry, &ray, f32::INFINITY, true)
+                    .cast_ray_and_get_normal(&isometry, &ray, f64::INFINITY, true)
             {
+                let hitpoint = ray.point_at(hit.time_of_impact);
                 picks.push((
                     frame_entity,
                     HitData::new(
                         ray_id.camera,
-                        hit.time_of_impact,
-                        Some(ray.point_at(hit.time_of_impact).into()),
-                        Some(hit.normal.into()),
+                        hit.time_of_impact as f32,
+                        Some(hitpoint.cast::<f32>().into()),
+                        Some(hit.normal.cast::<f32>().into()),
                     ),
                 ));
             }
@@ -99,7 +108,7 @@ pub(crate) fn box_frame_backend(
     }
 }
 
-fn isometry_from_transform(tfm: &GlobalTransform) -> Isometry3<f32> {
+fn isometry_from_transform(tfm: &GlobalTransform) -> Isometry3<f64> {
     let (_scale, rot, trans) = tfm.to_scale_rotation_translation();
-    Isometry3::from_parts(trans.into(), rot.into())
+    Isometry3::from_parts(trans.as_dvec3().into(), rot.as_dquat().into())
 }
