@@ -1,13 +1,14 @@
 use bevy::{
-    asset::{weak_handle, Asset},
+    asset::{uuid_handle, Asset},
     color::{LinearRgba, Srgba},
     prelude::{AlphaMode, Handle, Material, Shader},
     reflect::TypePath,
-    render::render_resource::{AsBindGroup, ShaderRef},
+    render::render_resource::AsBindGroup,
+    shader::ShaderRef,
 };
 
 pub(crate) const SHADER_HANDLE: Handle<Shader> =
-    weak_handle!("15b3e75a-7b53-486f-8fc0-feb12e9f63c8");
+    uuid_handle!("15b3e75a-7b53-486f-8fc0-feb12e9f63c8");
 
 /// A mesh material that only outputs a single color.
 #[allow(missing_docs)]
