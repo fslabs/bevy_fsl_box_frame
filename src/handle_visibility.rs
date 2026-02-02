@@ -6,15 +6,15 @@ use bevy::{
 };
 
 pub fn handle_visibility(
-    mut over_events: EventReader<Pointer<Over>>,
-    mut move_events: EventReader<Pointer<Move>>,
-    mut out_events: EventReader<Pointer<Out>>,
+    mut over_events: MessageReader<Pointer<Over>>,
+    mut move_events: MessageReader<Pointer<Move>>,
+    mut out_events: MessageReader<Pointer<Out>>,
     box_frames: Query<&BoxFrame>,
     mut visibility: Query<&mut Visibility>,
 ) {
-    let normalized_over = over_events.read().map(|e| (e.target, Visibility::Visible));
-    let normalized_move = move_events.read().map(|e| (e.target, Visibility::Visible));
-    let normalized_out = out_events.read().map(|e| (e.target, Visibility::Hidden));
+    let normalized_over = over_events.read().map(|e| (e.entity, Visibility::Visible));
+    let normalized_move = move_events.read().map(|e| (e.entity, Visibility::Visible));
+    let normalized_out = out_events.read().map(|e| (e.entity, Visibility::Hidden));
 
     for (target, set_visibility) in normalized_over.chain(normalized_move).chain(normalized_out) {
         let Ok(frame) = box_frames.get(target) else {

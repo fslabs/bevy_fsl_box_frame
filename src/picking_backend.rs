@@ -1,9 +1,9 @@
 use crate::BoxFrame;
 use bevy::{
+    camera::visibility::RenderLayers,
     ecs::prelude::*,
     picking::backend::{ray::RayMap, HitData, PointerHits},
     prelude::{Camera, GlobalTransform},
-    render::view::RenderLayers,
 };
 use parry3d_f64::{na::Isometry3, query::RayCast};
 
@@ -13,7 +13,7 @@ pub(crate) fn box_frame_backend(
     cameras: Query<(&Camera, Option<&RenderLayers>)>,
     box_frames: Query<(Entity, &BoxFrame, &GlobalTransform, Option<&RenderLayers>)>,
     transforms: Query<&GlobalTransform>,
-    mut picking_out: EventWriter<PointerHits>,
+    mut picking_out: MessageWriter<PointerHits>,
 ) {
     for (&ray_id, &ray) in ray_map.map.iter() {
         let Ok((camera, view_mask)) = cameras.get(ray_id.camera) else {

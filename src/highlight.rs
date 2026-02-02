@@ -3,10 +3,10 @@ use bevy::prelude::*;
 use bevy_polyline::prelude::PolylineMaterialHandle;
 
 pub(crate) fn highlight_face(
-    mut over_events: EventReader<Pointer<Over>>,
-    mut move_events: EventReader<Pointer<Move>>,
-    mut out_events: EventReader<Pointer<Out>>,
-    mut drag_end_events: EventReader<Pointer<DragEnd>>,
+    mut over_events: MessageReader<Pointer<Over>>,
+    mut move_events: MessageReader<Pointer<Move>>,
+    mut out_events: MessageReader<Pointer<Out>>,
+    mut drag_end_events: MessageReader<Pointer<DragEnd>>,
     box_frames: Query<(&BoxFrame, &GlobalTransform)>,
     mut line_handles: Query<&mut PolylineMaterialHandle>,
 ) {
@@ -20,12 +20,12 @@ pub(crate) fn highlight_face(
 
     let normalized_over = over_events
         .read()
-        .map(|e| (e.target, Some(e.event.hit.clone())));
+        .map(|e| (e.entity, Some(e.event.hit.clone())));
     let normalized_move = move_events
         .read()
-        .map(|e| (e.target, Some(e.event.hit.clone())));
-    let normalized_out = out_events.read().map(|e| (e.target, None));
-    let normalized_drag_end = drag_end_events.read().map(|e| (e.target, None));
+        .map(|e| (e.entity, Some(e.event.hit.clone())));
+    let normalized_out = out_events.read().map(|e| (e.entity, None));
+    let normalized_drag_end = drag_end_events.read().map(|e| (e.entity, None));
 
     // Highlight faces intersecting a pointer ray. "Out" events will clear all
     // highlights.
@@ -55,18 +55,18 @@ pub(crate) fn highlight_face(
 }
 
 pub(crate) fn highlight_handles(
-    mut over_events: EventReader<Pointer<Over>>,
-    mut out_events: EventReader<Pointer<Out>>,
+    mut over_events: MessageReader<Pointer<Over>>,
+    mut out_events: MessageReader<Pointer<Out>>,
     mut handles: Query<(&BoxFrameHandle, &mut Transform)>,
 ) {
     for over in over_events.read() {
-        let Ok((handle, mut tfm)) = handles.get_mut(over.target) else {
+        let Ok((handle, mut tfm)) = handles.get_mut(over.entity) else {
             continue;
         };
         tfm.scale = Vec3::splat(handle.base_scale * handle.hover_scale);
     }
     for out in out_events.read() {
-        let Ok((handle, mut tfm)) = handles.get_mut(out.target) else {
+        let Ok((handle, mut tfm)) = handles.get_mut(out.entity) else {
             continue;
         };
         tfm.scale = Vec3::splat(handle.base_scale);

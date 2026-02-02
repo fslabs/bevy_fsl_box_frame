@@ -13,7 +13,7 @@ pub use solid_color_material::*;
 
 use bevy::{
     asset::load_internal_asset,
-    picking::PickSet,
+    picking::PickingSystems,
     prelude::{IntoScheduleConfigs, MaterialPlugin, Plugin, PreUpdate, Shader, Update},
 };
 use drag_face::*;
@@ -34,7 +34,7 @@ impl Plugin for BoxFramePlugin {
         );
 
         app.add_plugins(MaterialPlugin::<SolidColorMaterial>::default())
-            .add_systems(PreUpdate, box_frame_backend.in_set(PickSet::Backend))
+            .add_systems(PreUpdate, box_frame_backend.in_set(PickingSystems::Backend))
             .add_systems(Update, (handle_visibility, highlight_handles))
             // Correct highlighting updates depend on the state of dragging.
             .add_systems(Update, (drag_face, highlight_face).chain());

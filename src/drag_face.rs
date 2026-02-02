@@ -27,8 +27,8 @@ impl Dragging {
 
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn drag_face(
-    mut drag_start_events: EventReader<Pointer<DragStart>>,
-    mut drag_end_events: EventReader<Pointer<DragEnd>>,
+    mut drag_start_events: MessageReader<Pointer<DragStart>>,
+    mut drag_end_events: MessageReader<Pointer<DragEnd>>,
     ray_map: Res<RayMap>,
     mut polylines: ResMut<Assets<Polyline>>,
     mut box_frames: Query<(&mut BoxFrame, &GlobalTransform)>,
@@ -37,7 +37,7 @@ pub(crate) fn drag_face(
 ) {
     // Start or stop the dragging state machine based on events.
     for drag_start in drag_start_events.read() {
-        let Ok((mut frame, transform)) = box_frames.get_mut(drag_start.target) else {
+        let Ok((mut frame, transform)) = box_frames.get_mut(drag_start.entity) else {
             continue;
         };
         if drag_start.event.button != frame.drag_button {
@@ -64,7 +64,7 @@ pub(crate) fn drag_face(
         });
     }
     for drag_end in drag_end_events.read() {
-        let Ok((mut frame, _)) = box_frames.get_mut(drag_end.target) else {
+        let Ok((mut frame, _)) = box_frames.get_mut(drag_end.entity) else {
             continue;
         };
         frame.on_drag_end(&mut line_handles, &mut polylines);

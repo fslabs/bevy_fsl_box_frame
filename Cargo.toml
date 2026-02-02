@@ -1,6 +1,6 @@
 [package]
 name = "bevy_fsl_box_frame"
-version = "0.6.1"
+version = "0.7.0"
 description = "A gizmo for manipulating an OBB via 3D picking"
 edition = "2021"
 authors = ["Duncan Fairbanks <duncan.fairbanks@fslabs.ca>"]
@@ -16,17 +16,23 @@ categories = ["game-development"]
 
 [dependencies]
 approx = "0.5"
-bevy_polyline = "0.12"
+bevy_polyline = "0.13"
 parry3d-f64 = "0.19"
-bevy = { version = "0.16", default-features = false, features = [
+bevy = { version = "0.17", default-features = false, features = [
   "bevy_asset",
   "bevy_pbr",
   "bevy_picking",
+  "zstd_rust"
 ] }
-nalgebra = { version = "0.33", features = ["convert-glam029"] }
+nalgebra = { version = "0.33", features = ["convert-glam030"] }
+
+# patch to enable glam 0.30 support.
+[patch.crates-io.nalgebra]
+git = "https://github.com/fslabs/nalgebra/"
+rev = "99d45dfc4bd705e2af9226695bb4694772684f67"
 
 [dev-dependencies]
-bevy = { version = "0.16", default-features = false, features = [
+bevy = { version = "0.17", default-features = false, features = [
   "bevy_asset",
   "bevy_pbr",
   "bevy_winit",
