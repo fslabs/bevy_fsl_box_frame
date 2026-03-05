@@ -3,7 +3,7 @@ use bevy::{color::palettes::css::RED, ecs::system::EntityCommands, math::FloatOr
 use bevy_polyline::prelude::{
     Polyline, PolylineBundle, PolylineHandle, PolylineMaterial, PolylineMaterialHandle,
 };
-use parry3d_f64::{bounding_volume::Aabb, shape::Ball};
+use parry3d_f64::{bounding_volume::Aabb, math::Vector, shape::Ball};
 
 /// The behavioral component of a box frame entity.
 ///
@@ -177,7 +177,7 @@ impl BoxFrame {
 
     /// The center of the box's AABB in local coordinates.
     pub fn center(&self) -> Vec3 {
-        self.aabb().center().cast::<f32>().into()
+        self.aabb().center().as_vec3()
     }
 
     /// The full extents of the box along each axis.
@@ -347,8 +347,8 @@ fn sorted_faces(faces: [f32; 6]) -> [f32; 6] {
 fn aabb_from_faces(faces: [f32; 6]) -> Aabb {
     let [x1, y1, z1, x2, y2, z2] = sorted_faces(faces);
     Aabb::new(
-        nalgebra::Point3::new(x1, y1, z1).cast(),
-        nalgebra::Point3::new(x2, y2, z2).cast(),
+        Vector::new(x1 as f64, y1 as f64, z1 as f64),
+        Vector::new(x2 as f64, y2 as f64, z2 as f64),
     )
 }
 
