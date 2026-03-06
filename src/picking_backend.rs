@@ -5,7 +5,7 @@ use bevy::{
     picking::backend::{ray::RayMap, HitData, PointerHits},
     prelude::{Camera, GlobalTransform},
 };
-use parry3d_f64::{na::Isometry3, query::RayCast};
+use parry3d_f64::{math::Pose, query::RayCast};
 
 /// Generates pointer hits for the box frame's AABB and handles.
 pub(crate) fn box_frame_backend(
@@ -42,7 +42,7 @@ pub(crate) fn box_frame_backend(
                 .into_iter()
                 .filter_map(|handle_entity| {
                     let transform = transforms.get(handle_entity).ok()?;
-                    let isometry = isometry_from_transform(transform).cast::<f64>();
+                    let isometry = isometry_from_transform(transform);
                     ball.cast_ray(&isometry, &ray, f64::INFINITY, true)
                         .map(|toi| {
                             let world_handle_center = transform.translation();
@@ -61,7 +61,7 @@ pub(crate) fn box_frame_backend(
                     HitData::new(
                         ray_id.camera,
                         toi as f32 - fudge,
-                        Some(intersect_p.cast::<f32>().into()),
+                        Some(intersect_p.as_vec3()),
                         None,
                     ),
                 ));
@@ -70,7 +70,7 @@ pub(crate) fn box_frame_backend(
                     HitData::new(
                         ray_id.camera,
                         toi as f32,
-                        Some(intersect_p.cast::<f32>().into()),
+                        Some(intersect_p.as_vec3()),
                         Some(world_normal),
                     ),
                 ));
@@ -91,8 +91,8 @@ pub(crate) fn box_frame_backend(
                     HitData::new(
                         ray_id.camera,
                         hit.time_of_impact as f32,
-                        Some(hitpoint.cast::<f32>().into()),
-                        Some(hit.normal.cast::<f32>().into()),
+                        Some(hitpoint.as_vec3()),
+                        Some(hit.normal.as_vec3()),
                     ),
                 ));
             }
@@ -108,7 +108,7 @@ pub(crate) fn box_frame_backend(
     }
 }
 
-fn isometry_from_transform(tfm: &GlobalTransform) -> Isometry3<f64> {
+fn isometry_from_transform(tfm: &GlobalTransform) -> Pose {
     let (_scale, rot, trans) = tfm.to_scale_rotation_translation();
-    Isometry3::from_parts(trans.as_dvec3().into(), rot.as_dquat().into())
+    Pose::from_parts(trans.as_dvec3(), rot.as_dquat().into())
 }
