@@ -16,18 +16,18 @@ categories = ["game-development"]
 
 [dependencies]
 approx = "0.5"
-bevy_polyline = "0.13"
+bevy_polyline = { git = "https://github.com/fslabs/bevy_polyline", rev = "49bb4be904e8c3314efdb5266d1b6cd3d041297f" }
 parry3d-f64 = "0.26"
-bevy = { version = "0.17", default-features = false, features = [
+bevy = { version = "0.18", default-features = false, features = [
   "bevy_asset",
   "bevy_pbr",
   "bevy_picking",
-  "zstd_rust"
+  "zstd_rust",
 ] }
 nalgebra = { version = "0.34", features = ["convert-glam030"] }
 
 [dev-dependencies]
-bevy = { version = "0.17", default-features = false, features = [
+bevy = { version = "0.18", default-features = false, features = [
   "bevy_asset",
   "bevy_pbr",
   "bevy_winit",
